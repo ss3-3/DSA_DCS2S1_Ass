@@ -5,11 +5,13 @@ public class MalaysiaAirlineSystem {
     private MalaysiaAirlineGraph flightNetwork;
     private Scanner scanner;
     private String staffId;
+    private MalaysiaAirlineGUI guiWindow;
     
     public MalaysiaAirlineSystem() {
         this.flightNetwork = new MalaysiaAirlineGraph();
         this.scanner = new Scanner(System.in);
         this.staffId = "MAS01";
+        this.guiWindow = null;
     }
     
     public void run() {
@@ -30,11 +32,17 @@ public class MalaysiaAirlineSystem {
                 case "3":
                     flightNetwork.displayGraph();
                     break;
+                case "4":
+                    showGUIMode();
+                    break;
                 case "0":
+                    if (guiWindow != null) {
+                        guiWindow.dispose();
+                    }
                     System.out.println("Thank you for using Malaysia Airlines System!");
                     return;
                 default:
-                    System.out.println("Invalid selection. Please try again.");
+                    System.out.println("[ERROR] Invalid selection. Please try again.");
             }
         }
     }
@@ -43,9 +51,29 @@ public class MalaysiaAirlineSystem {
         System.out.println("\nMain Menu (Press '0' to exit)");
         System.out.println("1. Create Graph");
         System.out.println("2. Search for an Airport");
-        System.out.println("3. View the MAS Flight Network");
+        System.out.println("3. View the MAS Flight Network (Text)");
+        System.out.println("4. View the MAS Flight Network (GUI)");
         System.out.println("0. Exit");
         System.out.print("Selection: ");
+    }
+    
+    private void showGUIMode() {
+        if (flightNetwork.getAirportCount() == 0) {
+            System.out.println("[WARNING] No airports in the network yet. Add some airports first!");
+            return;
+        }
+        
+        try {
+            if (guiWindow == null || !guiWindow.isDisplayable()) {
+                guiWindow = new MalaysiaAirlineGUI(flightNetwork);
+            }
+            guiWindow.setVisible(true);
+            guiWindow.toFront();
+            guiWindow.refresh();
+            System.out.println("[SUCCESS] GUI window opened! You can continue using the console while GUI is open.");
+        } catch (Exception e) {
+            System.out.println("[ERROR] Error opening GUI: " + e.getMessage());
+        }
     }
     
     private void createGraphMenu() {
@@ -76,14 +104,19 @@ public class MalaysiaAirlineSystem {
                 case "5":
                     return;
                 default:
-                    System.out.println("Invalid selection. Please try again.");
+                    System.out.println("[ERROR] Invalid selection. Please try again.");
+            }
+            
+            // Refresh GUI if it's open
+            if (guiWindow != null && guiWindow.isVisible()) {
+                guiWindow.refresh();
             }
         }
     }
     
     private void addVertexMenu() {
         while (true) {
-            System.out.println("\n#(1) Add a vertex");
+            System.out.println("\n[ADD VERTEX] #(1) Add a vertex");
             
             // Show current airports
             System.out.println("Current airports in the network:");
@@ -94,7 +127,7 @@ public class MalaysiaAirlineSystem {
             String cityName = scanner.nextLine();
             
             if (cityName.trim().isEmpty()) {
-                System.out.println("City name cannot be empty. Please try again.");
+                System.out.println("[ERROR] City name cannot be empty. Please try again.");
                 continue;
             }
             
@@ -109,7 +142,7 @@ public class MalaysiaAirlineSystem {
     }
     
     private void removeVertexMenu() {
-        System.out.println("\n#(2) Remove a vertex");
+        System.out.println("\n[REMOVE VERTEX] #(2) Remove a vertex");
         
         if (flightNetwork.getAirportCount() == 0) {
             System.out.println("No airports available to remove.");
@@ -130,7 +163,7 @@ public class MalaysiaAirlineSystem {
         }
         
         if (!InputValidator.isValidChoice(choice, 1, flightNetwork.getAirportCount())) {
-            System.out.println("Invalid selection. Please enter a valid number.");
+            System.out.println("[ERROR] Invalid selection. Please enter a valid number.");
             return;
         }
         
@@ -138,7 +171,7 @@ public class MalaysiaAirlineSystem {
         String airportToRemove = flightNetwork.getAirportByIndex(index);
         
         if (airportToRemove != null) {
-            System.out.print("Are you sure you want to remove " + airportToRemove + "? (Y/N): ");
+            System.out.print("[WARNING] Are you sure you want to remove " + airportToRemove + "? (Y/N): ");
             String confirm = scanner.nextLine().trim().toLowerCase();
             if (confirm.equals("y") || confirm.equals("yes")) {
                 flightNetwork.removeVertex(airportToRemove);
@@ -150,10 +183,10 @@ public class MalaysiaAirlineSystem {
     
     private void addEdgeMenu() {
         while (true) {
-            System.out.println("\n#(3) Add an Edge");
+            System.out.println("\n[ADD EDGE] #(3) Add an Edge");
             
             if (flightNetwork.getAirportCount() < 2) {
-                System.out.println("Need at least 2 airports to create a flight path.");
+                System.out.println("[ERROR] Need at least 2 airports to create a flight path.");
                 System.out.println("Please add more airports first.");
                 return;
             }
@@ -167,7 +200,7 @@ public class MalaysiaAirlineSystem {
             String choice1 = scanner.nextLine().trim();
             
             if (!InputValidator.isValidChoice(choice1, 1, flightNetwork.getAirportCount())) {
-                System.out.println("Invalid selection for 1st airport.");
+                System.out.println("[ERROR] Invalid selection for 1st airport.");
                 continue;
             }
             
@@ -178,7 +211,7 @@ public class MalaysiaAirlineSystem {
             String choice2 = scanner.nextLine().trim();
             
             if (!InputValidator.isValidChoice(choice2, 1, flightNetwork.getAirportCount())) {
-                System.out.println("Invalid selection for 2nd airport.");
+                System.out.println("[ERROR] Invalid selection for 2nd airport.");
                 continue;
             }
             
@@ -197,7 +230,7 @@ public class MalaysiaAirlineSystem {
     }
     
     private void removeEdgeMenu() {
-        System.out.println("\n#(4) Remove an Edge");
+        System.out.println("\n[REMOVE EDGE] #(4) Remove an Edge");
         
         List<String> edges = flightNetwork.displayEdgesForSelection();
         if (edges.isEmpty()) {
@@ -216,7 +249,7 @@ public class MalaysiaAirlineSystem {
         }
         
         if (!InputValidator.isValidChoice(choice, 1, edges.size())) {
-            System.out.println("Invalid selection. Please enter a valid number.");
+            System.out.println("[ERROR] Invalid selection. Please enter a valid number.");
             return;
         }
         
@@ -224,7 +257,7 @@ public class MalaysiaAirlineSystem {
         String[] airports = edges.get(index).split("\\|");
         
         if (airports.length == 2) {
-            System.out.print("Are you sure you want to remove the flight path between " + 
+            System.out.print("[WARNING] Are you sure you want to remove the flight path between " + 
                            airports[0] + " and " + airports[1] + "? (Y/N): ");
             String confirm = scanner.nextLine().trim().toLowerCase();
             if (confirm.equals("y") || confirm.equals("yes")) {
@@ -236,10 +269,10 @@ public class MalaysiaAirlineSystem {
     }
     
     private void searchAirport() {
-        System.out.println("\n=== Search for an Airport ===");
+        System.out.println("\n[SEARCH] === Search for an Airport ===");
         
         if (flightNetwork.getAirportCount() < 2) {
-            System.out.println("Need at least 2 airports to search for paths.");
+            System.out.println("[ERROR] Need at least 2 airports to search for paths.");
             return;
         }
         
@@ -252,7 +285,7 @@ public class MalaysiaAirlineSystem {
         String sourceChoice = scanner.nextLine().trim();
         
         if (!InputValidator.isValidChoice(sourceChoice, 1, flightNetwork.getAirportCount())) {
-            System.out.println("Invalid selection for source airport.");
+            System.out.println("[ERROR] Invalid selection for source airport.");
             return;
         }
         
@@ -263,19 +296,19 @@ public class MalaysiaAirlineSystem {
         String destChoice = scanner.nextLine().trim();
         
         if (!InputValidator.isValidChoice(destChoice, 1, flightNetwork.getAirportCount())) {
-            System.out.println("Invalid selection for destination airport.");
+            System.out.println("[ERROR] Invalid selection for destination airport.");
             return;
         }
         
         String destination = flightNetwork.getAirportByIndex(Integer.parseInt(destChoice));
         
         if (source == null || destination == null) {
-            System.out.println("Invalid airport selection.");
+            System.out.println("[ERROR] Invalid airport selection.");
             return;
         }
         
         if (source.equals(destination)) {
-            System.out.println("Source and destination cannot be the same airport.");
+            System.out.println("[ERROR] Source and destination cannot be the same airport.");
             return;
         }
         
@@ -283,18 +316,24 @@ public class MalaysiaAirlineSystem {
         
         System.out.println("\nSearch Results:");
         if (path.isEmpty()) {
-            System.out.println("No flight path found between " + source + " and " + destination + ".");
+            System.out.println("[NO PATH] No flight path found between " + source + " and " + destination + ".");
         } else {
-            System.out.println("Flight path found:");
+            System.out.println("[SUCCESS] Flight path found:");
             System.out.print("   ");
             for (int i = 0; i < path.size(); i++) {
                 System.out.print(path.get(i));
                 if (i < path.size() - 1) {
-                    System.out.print(" ✈️ ");
+                    System.out.print(" -> ");
                 }
             }
             System.out.println();
             System.out.println("Number of stops: " + (path.size() - 1));
+            
+            // Highlight path in GUI if it's open
+            if (guiWindow != null && guiWindow.isVisible()) {
+                guiWindow.showPathHighlight(source, destination);
+                System.out.println("[GUI] Path highlighted in GUI window!");
+            }
         }
         
         // Also perform BFS traversal from source
