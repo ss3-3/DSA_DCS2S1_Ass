@@ -14,36 +14,52 @@ public class MalaysiaAirlineSystem {
         this.staffId = "MAS01";
         this.guiWindow = null;
     }
+
+    public static void clearScreen() {  
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }  
     
     public void run() {
-        System.out.println("Welcome to Malaysia Airlines!");
-        System.out.println("Staff ID: " + staffId);
-        
+        boolean error = false;
+
         while (true) {
+            if(!error){
+                clearScreen();
+            }
+            System.out.println("Welcome to Malaysia Airlines!");
+            System.out.println("Staff ID: " + staffId);
             displayMainMenu();
             String choice = scanner.nextLine().trim();
             
             switch (choice) {
                 case "1":
+                    error = false;
                     createGraphMenu();
                     break;
                 case "2":
+                    error = false;
                     searchAirport();
                     break;
                 case "3":
+                    error = false;
                     flightNetwork.displayGraph();
+                    System.out.println("\n\nPress Enter to Continue...");
+                    scanner.nextLine();
                     break;
                 case "4":
+                    error = false;
                     showGUIMode();
                     break;
                 case "0":
                     if (guiWindow != null) {
                         guiWindow.dispose();
                     }
-                    System.out.println("Thank you for using Malaysia Airlines System!");
+                    System.out.println("\n\nThank you for using Malaysia Airlines System!");
                     return;
                 default:
-                    System.out.println("[ERROR] Invalid selection. Please try again.");
+                    System.out.println("\n\n[ERROR] Invalid selection. Please try again.");
+                    error = true;
             }
         }
     }
@@ -79,6 +95,7 @@ public class MalaysiaAirlineSystem {
     
     private void createGraphMenu() {
         while (true) {
+            clearScreen();
             System.out.println("\nCreate Graph: Enter \"1\" to \"5\" for updating the graph.");
             System.out.println("1. Add a vertex");
             System.out.println("2. Remove a vertex");
@@ -89,6 +106,7 @@ public class MalaysiaAirlineSystem {
             
             String choice = scanner.nextLine().trim();
             
+
             switch (choice) {
                 case "1":
                     addVertexMenu();
@@ -124,11 +142,23 @@ public class MalaysiaAirlineSystem {
             flightNetwork.displayAvailableAirports();
             System.out.println();
             
-            System.out.print("Enter the name of the city (letters only, e.g., 'Kuala Lumpur'): ");
+            System.out.print("Enter the name of the city (letters only, e.g., 'Kuala Lumpur') [Press 0 to cancel Operation]: ");
             String cityName = scanner.nextLine();
             
             if (cityName.trim().isEmpty()) {
                 System.out.println("[ERROR] City name cannot be empty. Please try again.");
+                continue;
+            }
+
+            if (cityName.equals("0")) {
+                System.out.println("Operation cancelled.");
+                System.out.println("\n\nPress Enter to Continue...");
+                scanner.nextLine();
+                return;
+            }
+
+            if (cityName.matches(".*\\d.*")){
+                System.out.println("Only letter only. Please try again.");
                 continue;
             }
             
@@ -136,48 +166,82 @@ public class MalaysiaAirlineSystem {
             
             System.out.print("Continue adding? (Y/N): ");
             String continueChoice = scanner.nextLine().trim().toLowerCase();
-            if (!continueChoice.equals("y") && !continueChoice.equals("yes")) {
+            if (continueChoice.equals("n") && !continueChoice.equals("no")) {
                 break;
+            }else if(!continueChoice.equals("y") && !continueChoice.equals("yes")){
+                do{
+                    System.out.println("\n[ERROR] Invalid input! ");
+                    System.out.print("Continue adding? (Y/N): ");
+                    continueChoice = scanner.nextLine().trim().toLowerCase();
+
+                }while(!continueChoice.equals("n") && !continueChoice.equals("no") &&
+                !continueChoice.equals("y") && !continueChoice.equals("yes"));
+
+                if (continueChoice.equals("n") && !continueChoice.equals("no")) {
+                    break;
+                }
             }
         }
     }
     
     private void removeVertexMenu() {
-        System.out.println("\n[REMOVE VERTEX] #(2) Remove a vertex");
-        
-        if (flightNetwork.getAirportCount() == 0) {
-            System.out.println("No airports available to remove.");
-            return;
-        }
-        
-        // Show airports with numbers for selection
-        flightNetwork.displayAirportsForSelection();
-        System.out.println("0. Cancel operation");
-        System.out.println();
-        
-        System.out.print("Select airport to remove (enter number): ");
-        String choice = scanner.nextLine().trim();
-        
-        if (choice.equals("0")) {
-            System.out.println("Operation cancelled.");
-            return;
-        }
-        
-        if (!InputValidator.isValidChoice(choice, 1, flightNetwork.getAirportCount())) {
-            System.out.println("[ERROR] Invalid selection. Please enter a valid number.");
-            return;
-        }
-        
-        int index = Integer.parseInt(choice);
-        String airportToRemove = flightNetwork.getAirportByIndex(index);
-        
-        if (airportToRemove != null) {
-            System.out.print("[WARNING] Are you sure you want to remove " + airportToRemove + "? (Y/N): ");
-            String confirm = scanner.nextLine().trim().toLowerCase();
-            if (confirm.equals("y") || confirm.equals("yes")) {
-                flightNetwork.removeVertex(airportToRemove);
-            } else {
+        while(true){
+            System.out.println("\n[REMOVE VERTEX] #(2) Remove a vertex");
+            
+            if (flightNetwork.getAirportCount() == 0) {
+                System.out.println("No airports available to remove.");
+                return;
+            }
+            
+            // Show airports with numbers for selection
+            flightNetwork.displayAirportsForSelection();
+            System.out.println("0. Cancel operation");
+            System.out.println();
+            
+            System.out.print("Select airport to remove (enter number): ");
+            String choice = scanner.nextLine().trim();
+            
+            if (choice.equals("0")) {
                 System.out.println("Operation cancelled.");
+                System.out.println("\n\nPress Enter to Continue...");
+                scanner.nextLine();
+                return;
+            }
+            
+            if (!InputValidator.isValidChoice(choice, 1, flightNetwork.getAirportCount())) {
+                System.out.println("[ERROR] Invalid selection. Please enter a valid number.");
+                return;
+            }
+            
+            int index = Integer.parseInt(choice);
+            String airportToRemove = flightNetwork.getAirportByIndex(index);
+            
+            if (airportToRemove != null) {
+                System.out.print("[WARNING] Are you sure you want to remove " + airportToRemove + "? (Y/N): ");
+                String confirm = scanner.nextLine().trim().toLowerCase();
+                if (confirm.equals("y") || confirm.equals("yes")) {
+                    flightNetwork.removeVertex(airportToRemove);
+                } else {
+                    System.out.println("Operation cancelled.");
+                }
+            }
+
+            System.out.print("Continue deleting? (Y/N): ");
+            String continueChoice = scanner.nextLine().trim().toLowerCase();
+            if (continueChoice.equals("n") && !continueChoice.equals("no")) {
+                return;
+            }else if(!continueChoice.equals("y") && !continueChoice.equals("yes")){
+                do{
+                    System.out.println("\n[ERROR] Invalid input! ");
+                    System.out.print("Continue deleting? (Y/N): ");
+                    continueChoice = scanner.nextLine().trim().toLowerCase();
+
+                }while(!continueChoice.equals("n") && !continueChoice.equals("no") &&
+                !continueChoice.equals("y") && !continueChoice.equals("yes"));
+
+                if (continueChoice.equals("n") && !continueChoice.equals("no")) {
+                    return;
+                }
             }
         }
     }
@@ -194,28 +258,44 @@ public class MalaysiaAirlineSystem {
             
             // Show available airports with numbers
             flightNetwork.displayAirportsForSelection();
+            System.out.println("0. Cancel operation");
             System.out.println();
             
             // Select first airport
             System.out.print("Select 1st airport (enter number): ");
             String choice1 = scanner.nextLine().trim();
-            
+
+
+            if (choice1.equals("0")) {
+                System.out.println("Operation cancelled.");
+                System.out.println("\n\nPress Enter to Continue...");
+                scanner.nextLine();
+                return;
+            }
+
             if (!InputValidator.isValidChoice(choice1, 1, flightNetwork.getAirportCount())) {
                 System.out.println("[ERROR] Invalid selection for 1st airport.");
                 continue;
             }
-            
+
             String airport1 = flightNetwork.getAirportByIndex(Integer.parseInt(choice1));
             
             // Select second airport
             System.out.print("Select 2nd airport (enter number): ");
             String choice2 = scanner.nextLine().trim();
+
+            if (choice2.equals("0")) {
+                System.out.println("Operation cancelled.");
+                System.out.println("\n\nPress Enter to Continue...");
+                scanner.nextLine();
+                return;
+            }
             
             if (!InputValidator.isValidChoice(choice2, 1, flightNetwork.getAirportCount())) {
                 System.out.println("[ERROR] Invalid selection for 2nd airport.");
                 continue;
             }
-            
+
             String airport2 = flightNetwork.getAirportByIndex(Integer.parseInt(choice2));
             
             if (airport1 != null && airport2 != null) {
@@ -224,47 +304,81 @@ public class MalaysiaAirlineSystem {
             
             System.out.print("Continue adding? (Y/N): ");
             String continueChoice = scanner.nextLine().trim().toLowerCase();
-            if (!continueChoice.equals("y") && !continueChoice.equals("yes")) {
+            if (continueChoice.equals("n") && !continueChoice.equals("no")) {
                 break;
+            }else if(!continueChoice.equals("y") && !continueChoice.equals("yes")){
+                do{
+                    System.out.println("\n[ERROR] Invalid input! ");
+                    System.out.print("Continue adding? (Y/N): ");
+                    continueChoice = scanner.nextLine().trim().toLowerCase();
+
+                }while(!continueChoice.equals("n") && !continueChoice.equals("no") &&
+                !continueChoice.equals("y") && !continueChoice.equals("yes"));
+
+                if (continueChoice.equals("n") && !continueChoice.equals("no")) {
+                    break;
+                }
             }
         }
     }
     
     private void removeEdgeMenu() {
-        System.out.println("\n[REMOVE EDGE] #(4) Remove an Edge");
-        
-        List<String> edges = flightNetwork.displayEdgesForSelection();
-        if (edges.isEmpty()) {
-            return;
-        }
-        
-        System.out.println("0. Cancel operation");
-        System.out.println();
-        
-        System.out.print("Select flight path to remove (enter number): ");
-        String choice = scanner.nextLine().trim();
-        
-        if (choice.equals("0")) {
-            System.out.println("Operation cancelled.");
-            return;
-        }
-        
-        if (!InputValidator.isValidChoice(choice, 1, edges.size())) {
-            System.out.println("[ERROR] Invalid selection. Please enter a valid number.");
-            return;
-        }
-        
-        int index = Integer.parseInt(choice) - 1;
-        String[] airports = edges.get(index).split("\\|");
-        
-        if (airports.length == 2) {
-            System.out.print("[WARNING] Are you sure you want to remove the flight path between " + 
-                           airports[0] + " and " + airports[1] + "? (Y/N): ");
-            String confirm = scanner.nextLine().trim().toLowerCase();
-            if (confirm.equals("y") || confirm.equals("yes")) {
-                flightNetwork.removeEdge(airports[0], airports[1]);
-            } else {
+        while(true){
+            System.out.println("\n[REMOVE EDGE] #(4) Remove an Edge");
+            
+            List<String> edges = flightNetwork.displayEdgesForSelection();
+            if (edges.isEmpty()) {
+                return;
+            }
+            
+            System.out.println("0. Cancel operation");
+            System.out.println();
+            
+            System.out.print("Select flight path to remove (enter number): ");
+            String choice = scanner.nextLine().trim();
+            
+            if (choice.equals("0")) {
                 System.out.println("Operation cancelled.");
+                System.out.println("\n\nPress Enter to Continue...");
+                scanner.nextLine();
+                return;
+            }
+            
+            if (!InputValidator.isValidChoice(choice, 1, edges.size())) {
+                System.out.println("[ERROR] Invalid selection. Please enter a valid number.");
+                return;
+            }
+            
+            int index = Integer.parseInt(choice) - 1;
+            String[] airports = edges.get(index).split("\\|");
+            
+            if (airports.length == 2) {
+                System.out.print("[WARNING] Are you sure you want to remove the flight path between " + 
+                            airports[0] + " and " + airports[1] + "? (Y/N): ");
+                String confirm = scanner.nextLine().trim().toLowerCase();
+                if (confirm.equals("y") || confirm.equals("yes")) {
+                    flightNetwork.removeEdge(airports[0], airports[1]);
+                } else {
+                    System.out.println("Operation cancelled.");
+                }
+            }
+
+            System.out.print("Continue adding? (Y/N): ");
+            String continueChoice = scanner.nextLine().trim().toLowerCase();
+            if (continueChoice.equals("n") && !continueChoice.equals("no")) {
+                break;
+            }else if(!continueChoice.equals("y") && !continueChoice.equals("yes")){
+                do{
+                    System.out.println("\n[ERROR] Invalid input! ");
+                    System.out.print("Continue adding? (Y/N): ");
+                    continueChoice = scanner.nextLine().trim().toLowerCase();
+
+                }while(!continueChoice.equals("n") && !continueChoice.equals("no") &&
+                !continueChoice.equals("y") && !continueChoice.equals("yes"));
+
+                if (continueChoice.equals("n") && !continueChoice.equals("no")) {
+                    break;
+                }
             }
         }
     }
@@ -342,6 +456,9 @@ public class MalaysiaAirlineSystem {
             System.out.println();
             flightNetwork.bfsTraversal(source);
         }
+
+        System.out.println("\n\nPress Enter to Continue...");
+        scanner.nextLine();
     }
     
     public static void main(String[] args) {
