@@ -6,9 +6,10 @@ public class MalaysiaAirlineSystem {
     private Scanner scanner;
     private String staffId;
     private MalaysiaAirlineGUI guiWindow;
+    Data data = new Data();
     
     public MalaysiaAirlineSystem() {
-        this.flightNetwork = new MalaysiaAirlineGraph();
+        this.flightNetwork = new MalaysiaAirlineGraph(data);
         this.scanner = new Scanner(System.in);
         this.staffId = "MAS01";
         this.guiWindow = null;

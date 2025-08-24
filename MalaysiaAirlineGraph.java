@@ -5,8 +5,22 @@ import java.util.*;
 public class MalaysiaAirlineGraph {
     private Map<String, Airport> airports;
     
-    public MalaysiaAirlineGraph() {
+    public MalaysiaAirlineGraph(Data data) {
         this.airports = new HashMap<>();
+        
+        // Load all airports from Data
+        for (Airport airport : data.allAirports) {
+            this.airports.put(airport.getCityName(), new Airport(airport.getCityName()));
+        }
+        
+        // Load all flight paths
+        for (FlightPath path : data.flightPaths) {
+            String src = path.getSource();
+            String dest = path.getDestination();
+            
+            this.airports.get(src).addConnection(dest);
+            this.airports.get(dest).addConnection(src);
+        }
     }
     
     // Add vertex (airport)
