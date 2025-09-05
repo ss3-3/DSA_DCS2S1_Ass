@@ -61,6 +61,9 @@ class MalaysiaAirlineGUI extends JFrame {
         
         refreshBtn.addActionListener(e -> {
             graphPanel.updateGraph();
+            if (flightNetwork.getAirportCount() > 0) {
+                graphPanel.arrangeNodesCircular(); // Auto arrange after refresh
+            }
             updateInfoArea();
         });
         
@@ -71,7 +74,7 @@ class MalaysiaAirlineGUI extends JFrame {
         // Initial setup
         graphPanel.updateGraph();
         if (flightNetwork.getAirportCount() > 0) {
-            graphPanel.arrangeNodesCircular();
+            graphPanel.arrangeNodesCircular(); // Auto arrange on startup
         }
         updateInfoArea();
     }
@@ -141,6 +144,9 @@ class MalaysiaAirlineGUI extends JFrame {
     
     public void refresh() {
         graphPanel.updateGraph();
+        if (flightNetwork.getAirportCount() > 0) {
+            graphPanel.arrangeNodesCircular(); // Auto arrange after refresh
+        }
         updateInfoArea();
     }
 }
